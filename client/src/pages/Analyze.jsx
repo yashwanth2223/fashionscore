@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import config from '../config';
 import './Analyze.css';
 
 const Analyze = () => {
@@ -50,7 +51,7 @@ const Analyze = () => {
     formData.append('image', selectedFile);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/analyze-fashion', formData, {
+      const response = await axios.post(config.apiUrl('/api/analyze-fashion'), formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

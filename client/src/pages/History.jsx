@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import config from '../config';
 import './History.css';
 
 const History = () => {
@@ -17,7 +18,7 @@ const History = () => {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/history');
+      const response = await axios.get(config.apiUrl('/api/history'));
       // Sort history by date (newest first)
       const sortedHistory = response.data.sort((a, b) => 
         new Date(b.date) - new Date(a.date)
@@ -40,7 +41,7 @@ const History = () => {
     }
     
     try {
-      await axios.delete(`http://localhost:5000/api/history/${id}`);
+      await axios.delete(config.apiUrl(`/api/history/${id}`));
       // Remove entry from local state
       setHistory(history.filter(entry => entry.id !== id));
       if (selectedEntry && selectedEntry.id === id) {
@@ -110,7 +111,7 @@ const History = () => {
                 >
                   <div className="item-thumb-container">
                     <img 
-                      src={`http://localhost:5000${entry.imagePath}`} 
+                      src={config.imageUrl(entry.imagePath)} 
                       alt="Outfit thumbnail" 
                       className="item-thumb"
                     />
@@ -149,7 +150,7 @@ const History = () => {
                 <div className="details-content">
                   <div className="details-image-container">
                     <img 
-                      src={`http://localhost:5000${selectedEntry.imagePath}`} 
+                      src={config.imageUrl(selectedEntry.imagePath)} 
                       alt="Analyzed outfit" 
                       className="details-image"
                     />
