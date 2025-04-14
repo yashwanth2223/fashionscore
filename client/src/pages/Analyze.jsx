@@ -51,15 +51,29 @@ const Analyze = () => {
     formData.append('image', selectedFile);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/analyze-fashion', formData, {
+      // First check if the server is reachable
+      try {
+        await axios.get(config.apiUrl('/api/health'));
+      } catch (healthError) {
+        throw new Error(`Server unavailable. Please try again later. (${healthError.message})`);
+      }
+
+      // Proceed with the analysis
+      const response = await axios.post(config.apiUrl('/api/analyze-fashion'), formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      
       setResult(response.data);
     } catch (err) {
       console.error('Error analyzing fashion:', err);
-      setError(err.response?.data?.error || 'Failed to analyze fashion. Please try again.');
+      
+      // Provide a more detailed error message
+      const errorDetails = err.response?.data?.details || '';
+      const errorMessage = err.response?.data?.error || 'Failed to analyze fashion. Please try again.';
+      
+      setError(`${errorMessage}${errorDetails ? `: ${errorDetails}` : ''}`);
     } finally {
       setLoading(false);
     }
