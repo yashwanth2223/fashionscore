@@ -17,8 +17,8 @@ const port = process.env.PORT || 5000;
 // More detailed CORS configuration
 app.use(cors({
   origin: '*', // Allow all origins (for testing)
-  methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: 'GET,POST,DELETE,OPTIONS',
+  allowedHeaders: 'Content-Type,Authorization'
 }));
 
 // Add OPTIONS handler for preflight requests
@@ -119,8 +119,15 @@ app.use('/images', express.static(path.join(__dirname, 'public', 'history-images
 // Google Generative AI setup
 let genAI;
 try {
-  genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-  console.log("Google Generative AI initialized successfully");
+  // Check if API key is valid
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey || apiKey.includes('https://')) {
+    console.error("Invalid Google API key configuration");
+    // Don't throw, just leave genAI as undefined
+  } else {
+    genAI = new GoogleGenerativeAI(apiKey);
+    console.log("Google Generative AI initialized successfully");
+  }
 } catch (error) {
   console.error("Error initializing Google Generative AI:", error);
 }
@@ -336,10 +343,15 @@ app.get('/api/history/:id', (req, res) => {
   }
 });
 
-// Delete a history entry
+// Delete a history entry - make sure route path is correct
 app.delete('/api/history/:id', (req, res) => {
   try {
-    const { id } = req.params;
+    // Get ID from parameters
+    const id = req.params.id;
+    if (!id) {
+      return res.status(400).json({ error: 'Missing ID parameter' });
+    }
+
     const history = getHistory();
     const entryIndex = history.findIndex(item => item.id === id);
     
