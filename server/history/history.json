@@ -1,0 +1,25 @@
+[
+  {
+    "id": "2329076f-68ea-416b-b5be-04ff2a8c0069",
+    "date": "2025-04-14T11:28:05.126Z",
+    "imagePath": "/images/2329076f-68ea-416b-b5be-04ff2a8c0069.jpg",
+    "score": 6.75,
+    "categoryScores": {
+      "style": 7,
+      "colorCoordination": 8,
+      "fit": 6,
+      "accessories": 5,
+      "occasionAppropriateness": 7
+    },
+    "feedback": {
+      "style": "The outfit is simple but cohesive. The hoodie is a contemporary choice. However, it lacks a unique element to elevate its style quotient.",
+      "colorCoordination": "The combination of royal blue and denim is classic and visually appealing. The white cap adds a nice contrast.",
+      "fit": "The hoodie seems slightly oversized, and the jeans could benefit from a more tailored fit.  The overall silhouette isn't the most flattering."
+    },
+    "recommendations": [
+      "Consider a more fitted hoodie or a different top layer to create a more polished look.",
+      "Experiment with different denim washes and fits to find jeans that flatter your body shape.",
+      "Adding a simple necklace or a more interesting watch could elevate the accessories and enhance the overall style"
+    ]
+  }
+]
