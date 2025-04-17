@@ -9,9 +9,9 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen w-full">
         <Navbar />
-        <main className="flex-grow">
+        <main className="flex-grow w-full">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/analyze" element={<Analyze />} />
