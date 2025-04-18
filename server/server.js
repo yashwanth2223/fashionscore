@@ -4,7 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { initializeDatabase } from './db/db.js';
+import { initializeDatabase, testDatabaseConnection } from './db/db.js';
 import userRoutes from './routes/userRoutes.js';
 import { optionalAuth, verifyToken } from './middleware/authMiddleware.js';
 import User from './models/userModel.js';
@@ -105,6 +105,30 @@ app.get('/api/verify', (req, res) => {
     nodeVersion: process.version,
     uptime: process.uptime()
   });
+});
+
+// Database verification endpoint
+app.get('/api/db-verify', async (req, res) => {
+  try {
+    // Test the database connection
+    const dbStatus = await testDatabaseConnection();
+    
+    // Return the database status
+    res.json({
+      ...dbStatus,
+      timestamp: new Date().toISOString(),
+      configuredHost: process.env.DB_HOST || 'localhost',
+      configuredUser: process.env.DB_USER || 'root',
+      configuredDatabase: process.env.DB_NAME || 'fashionscore'
+    });
+  } catch (error) {
+    console.error('Database verification error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Protected route example

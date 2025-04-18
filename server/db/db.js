@@ -85,5 +85,34 @@ async function initializeDatabase() {
   }
 }
 
+// Test database connection - useful for deployment verification
+async function testDatabaseConnection() {
+  try {
+    // Try to connect to the database
+    const connection = await pool.getConnection();
+    console.log('Database connection successful!');
+    
+    // Get database version info
+    const [rows] = await connection.query('SELECT VERSION() as version');
+    console.log(`Database version: ${rows[0].version}`);
+    
+    // Release the connection
+    connection.release();
+    return { success: true, version: rows[0].version };
+  } catch (error) {
+    console.error('Database connection test failed:', error);
+    return { 
+      success: false, 
+      error: error.message,
+      code: error.code,
+      // Include helpful info based on common errors
+      hint: error.code === 'ECONNREFUSED' ? 'Check if the database server is running and the host is correct' :
+            error.code === 'ER_ACCESS_DENIED_ERROR' ? 'Check your database username and password' :
+            error.code === 'ER_BAD_DB_ERROR' ? 'The database does not exist, it will be created automatically on first run' :
+            'Check your database configuration'
+    };
+  }
+}
+
 // Export the connection pool and initialization function
-export { pool, initializeDatabase }; 
+export { pool, initializeDatabase, testDatabaseConnection }; 
