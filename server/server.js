@@ -40,13 +40,19 @@ app.get('/images/:imageName', verifyToken, async (req, res) => {
     
     // Check if the requested image belongs to the user
     const validImage = outfits.some(outfit => {
-      // Extract just the filename from the image_path stored in DB
-      const storedImageName = path.basename(outfit.image_path);
-      return storedImageName === imageName;
+      try {
+        // Extract just the filename from the image_path stored in DB
+        // Handle both full URLs and relative paths
+        const storedImagePath = outfit.image_path || '';
+        const storedImageName = path.basename(storedImagePath);
+        return storedImageName === imageName;
+      } catch (err) {
+        console.error('Error parsing image path:', err);
+        return false;
+      }
     });
     
-    if (!validImage) 
-      {
+    if (!validImage) {
       return res.status(403).json({ error: 'Access denied to this image' });
     }
     
@@ -55,11 +61,17 @@ app.get('/images/:imageName', verifyToken, async (req, res) => {
     
     // Check if file exists
     if (!fs.existsSync(fullImagePath)) {
+      console.error(`Image not found at path: ${fullImagePath}`);
       return res.status(404).json({ error: 'Image not found' });
     }
     
     // Serve the file
-    res.sendFile(fullImagePath);
+    res.sendFile(fullImagePath, (err) => {
+      if (err) {
+        console.error('Error sending file:', err);
+        return res.status(500).json({ error: 'Failed to serve image' });
+      }
+    });
   } catch (error) {
     console.error('Error serving image:', error);
     return res.status(500).json({ 
@@ -69,12 +81,30 @@ app.get('/images/:imageName', verifyToken, async (req, res) => {
   }
 });
 
+// Fallback static file route for images (only used in development or if main route fails)
+// This should only be enabled in development environment
+if (process.env.NODE_ENV === 'development') {
+  app.use('/static-images', express.static(path.join(__dirname, 'public', 'history-images')));
+}
+
 // API routes
 app.use('/api/users', userRoutes);
 
 // Simple test route
 app.get('/', (req, res) => {
   res.json({ message: 'FashionScore API is running!' });
+});
+
+// Verification route for deployment health check
+app.get('/api/verify', (req, res) => {
+  // Return basic info about the server environment
+  res.json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'production',
+    nodeVersion: process.version,
+    uptime: process.uptime()
+  });
 });
 
 // Protected route example
