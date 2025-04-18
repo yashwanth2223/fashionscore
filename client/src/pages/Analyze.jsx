@@ -1,8 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import config from '../config';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from '../components/auth/AuthModal';
 import './Analyze.css';
 
 const Analyze = () => {
@@ -11,7 +13,16 @@ const Analyze = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const fileInputRef = useRef(null);
+  
+  const { 
+    isAuthenticated, 
+    user, 
+    checkUploadLimit, 
+    trackAnonymousUpload, 
+    trackUpload 
+  } = useAuth();
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -44,6 +55,15 @@ const Analyze = () => {
       return;
     }
 
+    // Check if user is authenticated or has not exceeded anonymous limit
+    const { limitReached, currentCount } = checkUploadLimit();
+    
+    if (limitReached) {
+      // If limit reached, show auth modal instead of analyzing
+      setAuthModalOpen(true);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -66,6 +86,13 @@ const Analyze = () => {
       });
       
       setResult(response.data);
+      
+      // Track the upload
+      if (isAuthenticated && user) {
+        await trackUpload(preview, response.data.score, JSON.stringify(response.data.feedback));
+      } else {
+        trackAnonymousUpload();
+      }
     } catch (err) {
       console.error('Error analyzing fashion:', err);
       
@@ -106,6 +133,22 @@ const Analyze = () => {
         >
           Get Your Fashion Score
         </motion.h1>
+
+        {/* Display upload limit info for non-authenticated users */}
+        {!isAuthenticated && (
+          <div className="upload-limit-info">
+            <p>
+              Free users can analyze up to 3 outfits.{' '}
+              <button 
+                className="sign-in-link"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Sign in
+              </button>{' '}
+              for unlimited analyses.
+            </p>
+          </div>
+        )}
 
         <div className="analyze-card">
           {!result ? (
@@ -304,6 +347,12 @@ const Analyze = () => {
           )}
         </div>
       </div>
+      
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+        initialMode="signup"
+      />
     </div>
   );
 };

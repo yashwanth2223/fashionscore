@@ -388,4 +388,28 @@
 
 .history-link:hover {
   color: var(--primary-dark);
+}
+
+.upload-limit-info {
+  margin-bottom: 1.5rem;
+  background-color: rgba(139, 92, 246, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+.sign-in-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 600;
+  color: var(--primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.sign-in-link:hover {
+  color: var(--primary-dark);
 } 
